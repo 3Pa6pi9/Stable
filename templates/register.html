@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Create Account - {{ app_name }}</title>
+   <style>
+       * { box-sizing: border-box; }
+       body {
+           margin: 0;
+           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+           background: linear-gradient(135deg, #fd297b 0%, #ff655b 100%);
+           height: 100vh;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+       }
+       .login-modal {
+           background: #fff;
+           padding: 40px;
+           border-radius: 15px;
+           width: 90%;
+           max-width: 380px;
+           text-align: center;
+           box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+           transition: opacity 0.5s ease;
+       }
+       .logo { font-size: 50px; font-weight: 800; color: #fd297b; margin-bottom: 20px; }
+       h2 { color: #333; margin-bottom: 30px; font-size: 20px; }
+       .input-field {
+           display: block;
+           width: 100%;
+           padding: 14px 20px;
+           margin: 12px 0;
+           border: 2px solid #ddd;
+           border-radius: 30px;
+           font-size: 14px;
+           color: #333;
+           outline: none;
+           transition: border-color 0.2s ease;
+       }
+       .input-field:focus { border-color: #fd297b; }
+       .btn {
+           display: block;
+           width: 100%;
+           padding: 14px;
+           margin: 12px 0;
+           border: 2px solid #ddd;
+           border-radius: 30px;
+           text-decoration: none;
+           color: #444;
+           font-weight: 600;
+           font-size: 14px;
+           background: #fff;
+           cursor: pointer;
+           transition: all 0.2s ease;
+       }
+       .submit-btn {
+           background: linear-gradient(135deg, #fd297b 0%, #ff655b 100%);
+           color: #fff;
+           border: none;
+           margin-top: 20px;
+           box-shadow: 0 4px 15px rgba(253, 41, 123, 0.3);
+       }
+       .submit-btn:hover { background: linear-gradient(135deg, #e0246b 0%, #ff5247 100%); }
+       .error-message { color: #ff3344; font-size: 13px; margin-top: 10px; margin-bottom: 5px; font-weight: 600; }
+       .nav-link { margin-top: 20px; font-size: 13px; }
+       .nav-link a { color: #fd297b; text-decoration: none; font-weight: 600; }
+   </style>
+</head>
+<body>
+
+<div class="login-modal" id="registerCard">
+   <div class="logo">{{ app_name }}</div>
+   <h2>Create Account</h2>
+   <div id="errorMsg" class="error-message"></div>
+   <form id="registerForm">
+       <input type="text" id="username" class="input-field" placeholder="Choose a Username" required>
+       <input type="password" id="password" class="input-field" placeholder="Choose a Password" required>
+       <button type="submit" class="btn submit-btn">REGISTER</button>
+   </form>
+   <div class="nav-link">
+       <a href="/">Already have an account? Log in</a>
+   </div>
+</div>
+
+<script>
+   const card = document.getElementById('registerCard');
+   card.style.opacity = '0';
+   setTimeout(() => { card.style.opacity = '1'; }, 100);
+   
+   document.getElementById('registerForm').addEventListener('submit', async function(event) {
+       event.preventDefault();
+       const username = document.getElementById('username').value.trim();
+       const password = document.getElementById('password').value;
+       const errorDiv = document.getElementById('errorMsg');
+       
+       errorDiv.textContent = '';
+       
+       try {
+           const response = await fetch('/api/register', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify({ username: username, password: password })
+           });
+           const data = await response.json();
+           
+           if (data.success) {
+               window.location.href = data.redirect;
+           } else {
+               errorDiv.textContent = data.error || 'Registration failed.';
+           }
+       } catch (err) {
+           errorDiv.textContent = 'Network error. Please try again.';
+       }
+   });
+</script>
+
+</body>
+</html>

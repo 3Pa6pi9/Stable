@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Admin Dashboard - {{ app_name }}</title>
+   <style>
+       * { box-sizing: border-box; }
+       body {
+           margin: 0;
+           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+           background: #111418;
+           min-height: 100vh;
+           padding: 40px 20px;
+           color: #e1e3e6;
+       }
+       .admin-container {
+           background: #21262d;
+           border-radius: 15px;
+           max-width: 1000px;
+           margin: 0 auto;
+           padding: 30px;
+           box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+           border: 1px solid #30363d;
+       }
+       .logo { 
+           font-size: 40px; font-weight: 800; margin-bottom: 10px; text-align: center; 
+           background: linear-gradient(135deg, #fd297b 0%, #ff655b 100%);
+           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+       }
+       h2 { color: #ffffff; margin-bottom: 10px; font-size: 22px; text-align: center; }
+       .welcome-text { color: #8b949e; margin: 0; }
+       .header-controls {
+           display: flex; justify-content: space-between; align-items: center;
+           margin-bottom: 25px; margin-top: 30px; padding-bottom: 15px; border-bottom: 1px solid #30363d;
+       }
+       .settings-panel {
+           margin-bottom: 25px; padding: 15px; background: #161b22; border-radius: 10px;
+           border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center;
+       }
+       .export-btn, .update-btn {
+           background: transparent; color: #ff655b; border: 2px solid #ff655b;
+           padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 13px;
+           font-weight: 600; transition: all 0.2s ease;
+       }
+       .export-btn:hover { background: rgba(255, 101, 91, 0.1); transform: scale(1.02); }
+       .update-btn { color: #3fb950; border-color: #3fb950; }
+       .update-btn:hover { background: rgba(63, 185, 80, 0.1); transform: scale(1.02); }
+       table { width: 100%; border-collapse: collapse; font-size: 14px; }
+       th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #30363d; }
+       th { background-color: #161b22; color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 12px; }
+       tr:hover td { background-color: rgba(255,255,255,0.02); }
+       .password-cell { color: #ff655b; font-family: monospace; letter-spacing: 1px; }
+       .btn-danger {
+           background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d;
+           padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 12px; transition: background 0.2s ease;
+       }
+       .btn-danger:hover { background: rgba(255, 77, 77, 0.15); }
+       .logout-btn {
+           display: inline-block; background: linear-gradient(135deg, #fd297b 0%, #ff655b 100%);
+           color: white; text-decoration: none; padding: 12px 35px; border-radius: 30px;
+           font-weight: 600; margin-top: 40px; text-align: center; transition: transform 0.2s ease;
+           box-shadow: 0 4px 15px rgba(253, 41, 123, 0.2);
+       }
+       .logout-btn:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(253, 41, 123, 0.3); }
+       .flash {
+           background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4);
+           padding: 12px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: 500;
+       }
+   </style>
+</head>
+<body>
+<div class="admin-container">
+   <div class="logo">{{ app_name }}</div>
+   <h2>Admin Controls</h2>
+   
+   {% if flash_message %}
+   <div class="flash">{{ flash_message }}</div>
+   {% endif %}
+
+   <div class="header-controls">
+       <div class="welcome-text">Welcome back, Administrator.</div>
+       <button onclick="exportTableToCSV('{{ app_name }}_users.csv')" class="export-btn">Export Data (CSV)</button>
+   </div>
+
+   <div class="settings-panel">
+       <span style="color: #8b949e; font-size: 14px; font-weight: 600;">App Name Configuration</span>
+       <form method="POST" action="/admin/settings" style="margin: 0; display: flex; gap: 10px; align-items: center;">
+           <input type="text" name="app_name" value="{{ app_name }}" style="padding: 8px 12px; border-radius: 20px; border: 1px solid #30363d; background: #21262d; color: #fff; outline: none; font-size: 13px;" required>
+           <button type="submit" class="update-btn">Update Name</button>
+       </form>
+   </div>
+   
+   <div style="overflow-x: auto;">
+       <table>
+           <thead>
+               <tr><th>ID</th><th>Username</th><th>Password</th><th>Role</th><th>Actions</th></tr>
+           </thead>
+           <tbody>
+               {% for u in users %}
+               <tr>
+                   <td>{{ u.id }}</td>
+                   <td style="font-weight: 600;">{{ u.username }}</td>
+                   <td class="password-cell">{{ u.password }}</td>
+                   <td>
+                       <span style="background: {{ 'rgba(253, 41, 123, 0.15); color: #fd297b;' if u.is_admin else 'rgba(139, 148, 158, 0.15); color: #8b949e;' }} padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                           {{ 'ADMIN' if u.is_admin else 'USER' }}
+                       </span>
+                   </td>
+                   <td>
+                       {% if not u.is_admin %}
+                       <form method="POST" action="/delete/{{ u.id }}" style="margin:0;" onsubmit="return confirm('Delete this user permanently?');">
+                           <button type="submit" class="btn-danger">Delete</button>
+                       </form>
+                       {% else %}
+                       <span style="color: #555; font-size: 12px;">Protected</span>
+                       {% endif %}
+                   </td>
+               </tr>
+               {% endfor %}
+           </tbody>
+       </table>
+   </div>
+   <div style="text-align: center;">
+       <a href="/logout" class="logout-btn">Log Out</a>
+   </div>
+</div>
+
+<script>
+   function exportTableToCSV(filename) {
+       let csv = [];
+       let rows = document.querySelectorAll("table tr");
+       for (let i = 0; i < rows.length; i++) {
+           let row = [];
+           let cols = rows[i].querySelectorAll("td, th");
+           for (let j = 0; j < cols.length - 1; j++) {
+               let data = cols[j].innerText.replace(/"/g, '""');
+               row.push('"' + data + '"');
+           }
+           csv.push(row.join(","));
+       }
+       let csvFile = new Blob([csv.join("\\n")], {type: "text/csv"});
+       let downloadLink = document.createElement("a");
+       downloadLink.download = filename;
+       downloadLink.href = window.URL.createObjectURL(csvFile);
+       downloadLink.style.display = "none";
+       document.body.appendChild(downloadLink);
+       downloadLink.click();
+       document.body.removeChild(downloadLink);
+   }
+</script>
+</body>
+</html>
