@@ -20,39 +20,13 @@
        }
        h2 { margin: 0; color: #fff; }
        .action-buttons { display: flex; gap: 10px; }
-       .logout-btn {
-           background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d;
-           padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px;
-       }
-       .logout-btn:hover { background: rgba(255, 77, 77, 0.1); }
-       .dev-btn {
-           background: transparent; color: #58a6ff; border: 1px solid #58a6ff;
-           padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px;
-       }
-       .dev-btn:hover { background: rgba(88, 166, 255, 0.1); }
+       .logout-btn { background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; }
+       .dev-btn { background: transparent; color: #58a6ff; border: 1px solid #58a6ff; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; }
        
-       .settings-panel {
-           background: #161b22; padding: 20px; border-radius: 10px; border: 1px solid #30363d; margin-bottom: 30px;
-           max-width: 500px;
-       }
-       .settings-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 15px; }
-       .input-group { flex: 1; min-width: 150px; }
-       label { font-size: 12px; color: #8b949e; font-weight: 600; margin-bottom: 5px; display: block; }
-       input[type="password"] {
-           width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d;
-           color: #fff; border-radius: 6px; outline: none; font-family: inherit;
-       }
-       input[type="password"]:focus { border-color: #58a6ff; }
-       
-       .save-btn {
-           background: #238636; color: #fff; border: none; padding: 11px 25px; width: 100%;
-           border-radius: 6px; cursor: pointer; font-weight: bold; height: 39px; margin-top: 5px;
-       }
-       .save-btn:hover { background: #2ea043; }
-
-       table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;}
+       /* Table Styling */
+       table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 40px; background: #161b22; border-radius: 10px; overflow: hidden; }
        th, td { padding: 14px; text-align: left; border-bottom: 1px solid #30363d; }
-       th { background-color: #161b22; color: #58a6ff; font-weight: 600; font-size: 12px; }
+       th { background-color: #0d1117; color: #58a6ff; font-weight: 600; font-size: 12px; }
        tr:hover td { background-color: rgba(255,255,255,0.02); }
        .time-cell { color: #8b949e; font-size: 12px; }
        .ip-cell { font-family: monospace; color: #8b949e; }
@@ -60,10 +34,15 @@
        .tag-old { background: rgba(88, 166, 255, 0.15); color: #58a6ff; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
        .tag-new { background: rgba(253, 41, 123, 0.15); color: #fd297b; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; }
        
-       .flash {
-           background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4);
-           padding: 12px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; text-align: center;
-       }
+       /* Toggle and Panel Styling */
+       #password-panel { display: none; background: #161b22; padding: 25px; border-radius: 10px; border: 1px solid #30363d; margin-top: 20px; max-width: 500px; }
+       .input-group { margin-bottom: 15px; }
+       label { font-size: 12px; color: #8b949e; display: block; margin-bottom: 5px; }
+       input[type="password"] { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; outline: none; }
+       .save-btn { background: #238636; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+       .btn-toggle { background: #30363d; color: #fff; padding: 12px 24px; border-radius: 6px; cursor: pointer; border: none; font-weight: bold; }
+       
+       .flash { background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4); padding: 12px; border-radius: 6px; margin-bottom: 20px; text-align: center; }
        .flash-error { color: #ff7b72; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.1); }
    </style>
 </head>
@@ -72,7 +51,7 @@
    <div class="header-row">
        <h2>{{ app_name }} Admin</h2>
        <div class="action-buttons">
-           <a href="/admin/developer" class="dev-btn">Developer Options</a>
+           {% if session.get('is_dev') %}<a href="/admin/developer" class="dev-btn">Developer Options</a>{% endif %}
            <a href="/logout" class="logout-btn">Log Out</a>
        </div>
    </div>
@@ -81,29 +60,7 @@
    <div class="flash {% if 'Error' in flash_message %}flash-error{% endif %}">{{ flash_message }}</div>
    {% endif %}
 
-   <div class="settings-panel">
-       <h3 style="margin-top: 0; color: #fff; font-size: 16px;">Change Admin Password</h3>
-       <form method="POST" action="/admin/change_password">
-           <input type="hidden" name="redirect_to" value="admin_dashboard">
-           <div class="settings-row">
-               <div class="input-group">
-                   <label>Current Password</label>
-                   <input type="password" name="current_password" required>
-               </div>
-               <div class="input-group">
-                   <label>New Password</label>
-                   <input type="password" name="new_password" required>
-               </div>
-               <div class="input-group">
-                   <label>Confirm New</label>
-                   <input type="password" name="confirm_password" required>
-               </div>
-           </div>
-           <button type="submit" class="save-btn">Update Password</button>
-       </form>
-   </div>
-
-   <h3 style="color: #fff; font-size: 16px;">Data Submissions</h3>
+   <h3>Data Submissions</h3>
    <div style="overflow-x: auto;">
        <table>
            <thead>
@@ -119,11 +76,7 @@
                {% for sub in submissions %}
                <tr>
                    <td class="time-cell">{{ sub.timestamp }}</td>
-                   <td>
-                       <span class="{{ 'tag-old' if sub.form_category == 'old' else 'tag-new' }}">
-                           {{ sub.form_category | upper }}
-                       </span>
-                   </td>
+                   <td><span class="{{ 'tag-old' if sub.form_category == 'old' else 'tag-new' }}">{{ sub.form_category | upper }}</span></td>
                    <td style="font-weight: 600; color: #fff;">{{ sub.data_field_1 }}</td>
                    <td style="font-weight: 600; color: #fff;">{{ sub.data_field_2 }}</td>
                    <td class="ip-cell">{{ sub.ip_address }}</td>
@@ -133,6 +86,19 @@
                {% endfor %}
            </tbody>
        </table>
+   </div>
+
+   <button class="btn-toggle" onclick="document.getElementById('password-panel').style.display='block'">Change Admin Password</button>
+
+   <div id="password-panel">
+       <h3 style="margin-top: 0; color: #fff;">Update Password</h3>
+       <form method="POST" action="/admin/change_password">
+           <input type="hidden" name="redirect_to" value="admin_dashboard">
+           <div class="input-group"><label>Current Password</label><input type="password" name="current_password" required></div>
+           <div class="input-group"><label>New Password</label><input type="password" name="new_password" required></div>
+           <div class="input-group"><label>Confirm Password</label><input type="password" name="confirm_password" required></div>
+           <button type="submit" class="save-btn">Update Password</button>
+       </form>
    </div>
 </div>
 </body>
