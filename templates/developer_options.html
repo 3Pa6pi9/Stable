@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Developer Options - {{ app_name }}</title>
+   <style>
+       * { box-sizing: border-box; }
+       body {
+           margin: 0; font-family: 'Helvetica Neue', Arial, sans-serif;
+           background: #111418; min-height: 100vh; padding: 40px 20px; color: #e1e3e6;
+       }
+       .admin-container {
+           background: #21262d; border-radius: 15px; max-width: 1000px; margin: 0 auto;
+           padding: 30px; border: 1px solid #30363d;
+       }
+       .header-row {
+           display: flex; justify-content: space-between; align-items: center;
+           border-bottom: 1px solid #30363d; padding-bottom: 20px; margin-bottom: 30px;
+       }
+       h2 { margin: 0; color: #fff; }
+       .action-buttons { display: flex; gap: 10px; }
+       .back-btn {
+           background: transparent; color: #c9d1d9; border: 1px solid #c9d1d9;
+           padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px;
+       }
+       .back-btn:hover { background: rgba(201, 209, 217, 0.1); }
+       
+       .settings-panel {
+           background: #161b22; padding: 25px; border-radius: 10px; border: 1px solid #30363d; margin-bottom: 30px;
+       }
+       .settings-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 15px; }
+       .input-group { flex: 1; min-width: 150px; }
+       label { font-size: 12px; color: #8b949e; font-weight: 600; margin-bottom: 5px; display: block; }
+       input[type="text"], input[type="password"], select {
+           width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d;
+           color: #fff; border-radius: 6px; outline: none; font-family: inherit;
+       }
+       input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color: #58a6ff; }
+       
+       .save-btn {
+           background: #238636; color: #fff; border: none; padding: 11px 25px; width: 100%;
+           border-radius: 6px; cursor: pointer; font-weight: bold; height: 39px; margin-top: 10px;
+       }
+       .save-btn:hover { background: #2ea043; }
+       
+       .flash {
+           background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4);
+           padding: 12px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; text-align: center;
+       }
+       .flash-error { color: #ff7b72; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.1); }
+   </style>
+</head>
+<body>
+<div class="admin-container">
+   <div class="header-row">
+       <h2>Developer Options</h2>
+       <div class="action-buttons">
+           <a href="/admin" class="back-btn">Back to Dashboard</a>
+       </div>
+   </div>
+
+   {% if flash_message %}
+   <div class="flash {% if 'Error' in flash_message %}flash-error{% endif %}">{{ flash_message }}</div>
+   {% endif %}
+
+   <div class="settings-panel">
+       <h3 style="margin-top: 0; color: #fff; font-size: 16px;">App Configuration</h3>
+       <form method="POST" action="/admin/settings/update">
+           <div class="settings-row">
+               <div class="input-group" style="max-width: 150px;">
+                   <label>App Name</label>
+                   <input type="text" name="app_name" value="{{ app_name }}">
+               </div>
+               <div class="input-group">
+                   <label>Placeholder 1</label>
+                   <input type="text" name="q1" value="{{ q1 }}">
+               </div>
+               <div class="input-group">
+                   <label>Placeholder 2</label>
+                   <input type="text" name="q2" value="{{ q2 }}">
+               </div>
+               <div class="input-group">
+                   <label>Bottom Link Text</label>
+                   <input type="text" name="link_text" value="{{ link_text }}">
+               </div>
+           </div>
+           
+           <div class="settings-row">
+               <div class="input-group">
+                   <label>Main Submit Button</label>
+                   <input type="text" name="btn_main" value="{{ btn_main }}">
+               </div>
+               <div class="input-group">
+                   <label>Page 2 Submit Button</label>
+                   <input type="text" name="btn_page2" value="{{ btn_page2 }}">
+               </div>
+               <div class="input-group">
+                   <label>Success Message Display</label>
+                   <input type="text" name="success_msg_text" value="{{ success_msg_text }}">
+               </div>
+           </div>
+
+           <div class="settings-row">
+               <div class="input-group">
+                   <label>After-Submit Behavior</label>
+                   <select name="submit_behavior">
+                       <option value="inline" {% if submit_behavior == 'inline' %}selected{% endif %}>Show Message on Same Page</option>
+                       <option value="redirect" {% if submit_behavior == 'redirect' %}selected{% endif %}>Redirect to Internal Success Page</option>
+                       <option value="external_redirect" {% if submit_behavior == 'external_redirect' %}selected{% endif %}>Redirect to External URL</option>
+                   </select>
+               </div>
+               <div class="input-group" style="flex: 2;">
+                   <label>External Redirect URL (Only used if selected above)</label>
+                   <input type="text" name="redirect_url" value="{{ redirect_url }}" placeholder="https://paronic.org">
+               </div>
+           </div>
+           
+           <button type="submit" class="save-btn">Save All Changes</button>
+       </form>
+   </div>
+
+   <div class="settings-panel">
+       <h3 style="margin-top: 0; color: #fff; font-size: 16px;">Change Admin Password</h3>
+       <form method="POST" action="/admin/change_password">
+           <input type="hidden" name="redirect_to" value="developer_options">
+           <div class="settings-row">
+               <div class="input-group">
+                   <label>Current Password</label>
+                   <input type="password" name="current_password" required>
+               </div>
+               <div class="input-group">
+                   <label>New Password</label>
+                   <input type="password" name="new_password" required>
+               </div>
+               <div class="input-group">
+                   <label>Confirm New</label>
+                   <input type="password" name="confirm_password" required>
+               </div>
+           </div>
+           <button type="submit" class="save-btn">Update Password</button>
+       </form>
+   </div>
+
+</div>
+</body>
+</html>

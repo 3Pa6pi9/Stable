@@ -69,7 +69,7 @@ def init_db():
             'btn_page2': 'SUBMIT ALL',
             'success_msg_text': 'Data received successfully!',
             'submit_behavior': 'redirect',
-            'redirect_url': 'https://paronic.org' # New setting for external URL
+            'redirect_url': 'https://paronic.org'
         }
         
         for key, default_val in defaults.items():
@@ -144,14 +144,11 @@ def api_submit():
         
         behavior = get_setting('submit_behavior', 'inline')
         
-        # New external redirect logic
         if behavior == 'external_redirect':
             target_url = get_setting('redirect_url', 'https://paronic.org')
-            # Ensure URL has http:// or https://
             if not target_url.startswith('http'):
                 target_url = 'https://' + target_url
             return redirect(target_url)
-            
         elif behavior == 'redirect':
             return redirect(url_for('success_page'))
         else:
@@ -183,6 +180,17 @@ def admin_dashboard():
     db = get_db()
     submissions = db.execute('SELECT * FROM submissions ORDER BY timestamp DESC').fetchall()
     
+    app_name = get_setting('app_name')
+    q1 = get_setting('question_1')
+    q2 = get_setting('question_2')
+    flash_message = request.args.get('flash')
+    
+    return render_template('admin_dashboard.html', submissions=submissions, flash_message=flash_message, 
+                           app_name=app_name, q1=q1, q2=q2)
+
+@app.route('/admin/developer')
+@admin_required
+def developer_options():
     settings = {
         'q1': get_setting('question_1'),
         'q2': get_setting('question_2'),
@@ -195,8 +203,7 @@ def admin_dashboard():
         'redirect_url': get_setting('redirect_url')
     }
     flash_message = request.args.get('flash')
-    
-    return render_template('admin_dashboard.html', submissions=submissions, flash_message=flash_message, **settings)
+    return render_template('developer_options.html', flash_message=flash_message, **settings)
 
 @app.route('/admin/settings/update', methods=['POST'])
 @admin_required
@@ -214,7 +221,31 @@ def update_settings():
             db.execute("UPDATE settings SET value = ? WHERE key = ?", (val, db_key))
             
     db.commit()
-    return redirect(url_for('admin_dashboard', flash="Settings updated successfully."))
+    return redirect(url_for('developer_options', flash="Settings updated successfully."))
+
+@app.route('/admin/change_password', methods=['POST'])
+@admin_required
+def change_password():
+    current_pw = request.form.get('current_password')
+    new_pw = request.form.get('new_password')
+    confirm_pw = request.form.get('confirm_password')
+    
+    # Determines whether to send them back to the Admin Dashboard or Developer Options
+    redirect_target = request.form.get('redirect_to', 'admin_dashboard')
+
+    if new_pw != confirm_pw:
+        return redirect(url_for(redirect_target, flash="Error: New passwords do not match."))
+
+    db = get_db()
+    user = db.execute('SELECT * FROM admin_users WHERE id = ?', (session['admin_id'],)).fetchone()
+
+    if user and check_password_hash(user['password'], current_pw):
+        hashed_pw = generate_password_hash(new_pw)
+        db.execute('UPDATE admin_users SET password = ? WHERE id = ?', (hashed_pw, session['admin_id']))
+        db.commit()
+        return redirect(url_for(redirect_target, flash="Success: Password updated."))
+    else:
+        return redirect(url_for(redirect_target, flash="Error: Incorrect current password."))
 
 @app.route('/logout')
 def logout():

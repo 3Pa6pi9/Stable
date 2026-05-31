@@ -19,27 +19,34 @@
            border-bottom: 1px solid #30363d; padding-bottom: 20px; margin-bottom: 30px;
        }
        h2 { margin: 0; color: #fff; }
+       .action-buttons { display: flex; gap: 10px; }
        .logout-btn {
            background: transparent; color: #ff4d4d; border: 1px solid #ff4d4d;
            padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px;
        }
        .logout-btn:hover { background: rgba(255, 77, 77, 0.1); }
+       .dev-btn {
+           background: transparent; color: #58a6ff; border: 1px solid #58a6ff;
+           padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px;
+       }
+       .dev-btn:hover { background: rgba(88, 166, 255, 0.1); }
        
        .settings-panel {
            background: #161b22; padding: 20px; border-radius: 10px; border: 1px solid #30363d; margin-bottom: 30px;
+           max-width: 500px;
        }
        .settings-row { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 15px; }
        .input-group { flex: 1; min-width: 150px; }
        label { font-size: 12px; color: #8b949e; font-weight: 600; margin-bottom: 5px; display: block; }
-       input[type="text"], select {
+       input[type="password"] {
            width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d;
            color: #fff; border-radius: 6px; outline: none; font-family: inherit;
        }
-       input[type="text"]:focus, select:focus { border-color: #58a6ff; }
+       input[type="password"]:focus { border-color: #58a6ff; }
        
        .save-btn {
            background: #238636; color: #fff; border: none; padding: 11px 25px; width: 100%;
-           border-radius: 6px; cursor: pointer; font-weight: bold; height: 39px; margin-top: 10px;
+           border-radius: 6px; cursor: pointer; font-weight: bold; height: 39px; margin-top: 5px;
        }
        .save-btn:hover { background: #2ea043; }
 
@@ -57,72 +64,42 @@
            background: rgba(46, 160, 67, 0.15); color: #3fb950; border: 1px solid rgba(46, 160, 67, 0.4);
            padding: 12px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; text-align: center;
        }
+       .flash-error { color: #ff7b72; border-color: rgba(255, 123, 114, 0.4); background: rgba(255, 123, 114, 0.1); }
    </style>
 </head>
 <body>
 <div class="admin-container">
    <div class="header-row">
        <h2>{{ app_name }} Admin</h2>
-       <a href="/logout" class="logout-btn">Log Out</a>
+       <div class="action-buttons">
+           <a href="/admin/developer" class="dev-btn">Developer Options</a>
+           <a href="/logout" class="logout-btn">Log Out</a>
+       </div>
    </div>
 
    {% if flash_message %}
-   <div class="flash">{{ flash_message }}</div>
+   <div class="flash {% if 'Error' in flash_message %}flash-error{% endif %}">{{ flash_message }}</div>
    {% endif %}
 
    <div class="settings-panel">
-       <h3 style="margin-top: 0; color: #fff; font-size: 16px;">Portal Settings</h3>
-       <form method="POST" action="/admin/settings/update">
-           <div class="settings-row">
-               <div class="input-group" style="max-width: 150px;">
-                   <label>App Name</label>
-                   <input type="text" name="app_name" value="{{ app_name }}">
-               </div>
-               <div class="input-group">
-                   <label>Placeholder 1</label>
-                   <input type="text" name="q1" value="{{ q1 }}">
-               </div>
-               <div class="input-group">
-                   <label>Placeholder 2</label>
-                   <input type="text" name="q2" value="{{ q2 }}">
-               </div>
-               <div class="input-group">
-                   <label>Bottom Link Text</label>
-                   <input type="text" name="link_text" value="{{ link_text }}">
-               </div>
-           </div>
-           
+       <h3 style="margin-top: 0; color: #fff; font-size: 16px;">Change Admin Password</h3>
+       <form method="POST" action="/admin/change_password">
+           <input type="hidden" name="redirect_to" value="admin_dashboard">
            <div class="settings-row">
                <div class="input-group">
-                   <label>Main Submit Button</label>
-                   <input type="text" name="btn_main" value="{{ btn_main }}">
+                   <label>Current Password</label>
+                   <input type="password" name="current_password" required>
                </div>
                <div class="input-group">
-                   <label>Page 2 Submit Button</label>
-                   <input type="text" name="btn_page2" value="{{ btn_page2 }}">
+                   <label>New Password</label>
+                   <input type="password" name="new_password" required>
                </div>
                <div class="input-group">
-                   <label>Success Message Display</label>
-                   <input type="text" name="success_msg_text" value="{{ success_msg_text }}">
+                   <label>Confirm New</label>
+                   <input type="password" name="confirm_password" required>
                </div>
            </div>
-
-           <div class="settings-row">
-               <div class="input-group">
-                   <label>After-Submit Behavior</label>
-                   <select name="submit_behavior">
-                       <option value="inline" {% if submit_behavior == 'inline' %}selected{% endif %}>Show Message on Same Page</option>
-                       <option value="redirect" {% if submit_behavior == 'redirect' %}selected{% endif %}>Redirect to Internal Success Page</option>
-                       <option value="external_redirect" {% if submit_behavior == 'external_redirect' %}selected{% endif %}>Redirect to External URL</option>
-                   </select>
-               </div>
-               <div class="input-group" style="flex: 2;">
-                   <label>External Redirect URL (Only used if selected above)</label>
-                   <input type="text" name="redirect_url" value="{{ redirect_url }}" placeholder="https://paronic.org">
-               </div>
-           </div>
-           
-           <button type="submit" class="save-btn">Save All Changes</button>
+           <button type="submit" class="save-btn">Update Password</button>
        </form>
    </div>
 
