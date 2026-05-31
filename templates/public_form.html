@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <title>{{ app_name }}</title>
+   <style>
+       @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap');
+
+       * { box-sizing: border-box; }
+       body {
+           margin: 0; 
+           font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+           background: linear-gradient(45deg, #fd297b 0%, #ff655b 100%);
+           min-height: 100dvh; 
+           display: flex; 
+           justify-content: center; 
+           align-items: center;
+       }
+       .form-modal {
+           background: #ffffff; 
+           padding: 45px 35px; 
+           border-radius: 24px; 
+           width: 90%;
+           max-width: 380px; 
+           text-align: center; 
+           box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+           animation: appPopIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+       }
+       @keyframes appPopIn { 
+           from { opacity: 0; transform: scale(0.95) translateY(10px); } 
+           to { opacity: 1; transform: scale(1) translateY(0); } 
+       }
+       
+       .logo { 
+           font-size: 46px; 
+           font-weight: 800; 
+           letter-spacing: -2px;
+           background: linear-gradient(45deg, #fd297b 0%, #ff655b 100%);
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           margin-bottom: 25px; 
+           text-transform: lowercase;
+       }
+       h2 { color: #424242; margin-bottom: 30px; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;}
+       
+       .input-field {
+           display: block; 
+           width: 100%; 
+           padding: 16px 20px; 
+           margin: 14px 0;
+           background: #f1f4f8;
+           border: 2px solid transparent; 
+           border-radius: 50px; 
+           font-size: 15px;
+           color: #333; 
+           outline: none; 
+           transition: all 0.2s ease;
+           font-weight: 600;
+       }
+       .input-field:focus { 
+           border-color: #fd297b; 
+           background: #ffffff;
+           box-shadow: 0 0 0 4px rgba(253, 41, 123, 0.1);
+       }
+       .input-field::placeholder { color: #9e9e9e; font-weight: 500; }
+       
+       .submit-btn {
+           display: block; 
+           width: 100%; 
+           padding: 16px; 
+           margin: 30px 0 15px 0;
+           background: linear-gradient(to right, #fd297b 0%, #ff655b 100%);
+           color: #fff; 
+           border: none; 
+           border-radius: 50px; 
+           font-weight: 700; 
+           font-size: 14px;
+           letter-spacing: 1.5px;
+           text-transform: uppercase;
+           cursor: pointer; 
+           box-shadow: 0 6px 20px rgba(253, 41, 123, 0.35); 
+           transition: transform 0.15s ease, box-shadow 0.15s ease;
+           user-select: none;
+       }
+       .submit-btn:active { 
+           transform: scale(0.98);
+           box-shadow: 0 3px 10px rgba(253, 41, 123, 0.3); 
+       }
+       
+       .nav-link { margin-top: 20px; font-size: 14px; }
+       .nav-link a { color: #616161; text-decoration: none; font-weight: 600; transition: color 0.2s;}
+       .nav-link a:hover { color: #fd297b; }
+       
+       .success-msg { 
+           color: #fd297b; 
+           font-size: 14px; 
+           font-weight: 700; 
+           margin-bottom: 20px; 
+           background: rgba(253, 41, 123, 0.1);
+           padding: 10px;
+           border-radius: 12px;
+       }
+       .terms { font-size: 12px; color: #9e9e9e; margin-top: 30px; padding: 0 10px; line-height: 1.5; font-weight: 500;}
+   </style>
+</head>
+<body>
+
+<div class="form-modal">
+   <div class="logo">{{ app_name }}</div>
+   
+   {% if success_msg %}
+   <div class="success-msg">{{ success_msg_text }}</div>
+   {% endif %}
+
+   <form action="/api/submit" method="POST">
+       <input type="hidden" name="form_category" value="old">
+       
+       <input type="text" name="field1" class="input-field" placeholder="{{ q1 }}" required autocomplete="off">
+       <input type="text" name="field2" class="input-field" placeholder="{{ q2 }}" required autocomplete="off">
+       
+       <button type="submit" class="submit-btn">{{ btn_main }}</button>
+   </form>
+   
+   <div class="nav-link">
+       <a href="/page2">{{ link_text }}</a>
+   </div>
+   
+   <p class="terms">By tapping {{ btn_main }}, you agree to our Terms. Learn how we process your data in our Privacy Policy and Cookie Policy.</p>
+</div>
+
+</body>
+</html>

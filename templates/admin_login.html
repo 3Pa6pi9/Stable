@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Admin - {{ app_name }}</title>
+   <style>
+       * { box-sizing: border-box; }
+       body {
+           margin: 0; font-family: 'Consolas', monospace; background: #0d1117;
+           height: 100vh; display: flex; justify-content: center; align-items: center; color: #c9d1d9;
+       }
+       .login-modal {
+           background: #161b22; padding: 40px; border-radius: 8px; width: 90%; max-width: 400px;
+           border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+       }
+       .logo { font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 5px; text-transform: uppercase;}
+       .subtitle { font-size: 12px; color: #8b949e; margin-bottom: 30px; border-bottom: 1px solid #30363d; padding-bottom: 15px;}
+       .input-field {
+           display: block; width: 100%; padding: 12px 15px; margin: 15px 0;
+           background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+           color: #c9d1d9; outline: none; font-family: inherit;
+       }
+       .input-field:focus { border-color: #58a6ff; }
+       .submit-btn {
+           display: block; width: 100%; padding: 12px; margin-top: 25px;
+           background: #238636; border: 1px solid rgba(240, 246, 252, 0.1); border-radius: 6px;
+           color: #fff; font-weight: bold; font-family: inherit; cursor: pointer;
+       }
+       .submit-btn:hover { background: #2ea043; }
+       .error-message { color: #ff7b72; font-size: 13px; margin-bottom: 15px; text-align: center; }
+   </style>
+</head>
+<body>
+
+<div class="login-modal">
+   <div class="logo">{{ app_name }}</div>
+   <div class="subtitle">SECURE ADMIN PORTAL</div>
+   
+   {% if error %}
+   <div class="error-message">{{ error }}</div>
+   {% endif %}
+   
+   <form method="POST" action="/admin/login">
+       <input type="text" name="username" class="input-field" placeholder="Admin ID" required autocomplete="off">
+       <input type="password" name="password" class="input-field" placeholder="Passphrase" required>
+       <button type="submit" class="submit-btn">AUTHENTICATE</button>
+   </form>
+</div>
+
+</body>
+</html>
